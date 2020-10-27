@@ -30,6 +30,8 @@
         {
             this.components = new System.ComponentModel.Container();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.txtStrTo16 = new System.Windows.Forms.TextBox();
+            this.cbSendHex = new System.Windows.Forms.CheckBox();
             this.label8 = new System.Windows.Forms.Label();
             this.txtSend = new System.Windows.Forms.RichTextBox();
             this.label7 = new System.Windows.Forms.Label();
@@ -79,6 +81,8 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.txtStrTo16);
+            this.groupBox1.Controls.Add(this.cbSendHex);
             this.groupBox1.Controls.Add(this.label8);
             this.groupBox1.Controls.Add(this.txtSend);
             this.groupBox1.Controls.Add(this.label7);
@@ -96,16 +100,35 @@
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(353, 376);
+            this.groupBox1.Size = new System.Drawing.Size(353, 534);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "串口";
+            // 
+            // txtStrTo16
+            // 
+            this.txtStrTo16.BackColor = System.Drawing.SystemColors.Control;
+            this.txtStrTo16.Location = new System.Drawing.Point(8, 509);
+            this.txtStrTo16.Name = "txtStrTo16";
+            this.txtStrTo16.Size = new System.Drawing.Size(330, 21);
+            this.txtStrTo16.TabIndex = 13;
+            // 
+            // cbSendHex
+            // 
+            this.cbSendHex.AutoSize = true;
+            this.cbSendHex.Location = new System.Drawing.Point(8, 486);
+            this.cbSendHex.Name = "cbSendHex";
+            this.cbSendHex.Size = new System.Drawing.Size(96, 16);
+            this.cbSendHex.TabIndex = 12;
+            this.cbSendHex.Text = "显示十六进制";
+            this.cbSendHex.UseVisualStyleBackColor = true;
+            this.cbSendHex.CheckedChanged += new System.EventHandler(this.cbSendHex_CheckedChanged);
             // 
             // label8
             // 
             this.label8.AutoSize = true;
             this.label8.ForeColor = System.Drawing.SystemColors.AppWorkspace;
-            this.label8.Location = new System.Drawing.Point(8, 281);
+            this.label8.Location = new System.Drawing.Point(6, 462);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(233, 12);
             this.label8.TabIndex = 11;
@@ -113,16 +136,17 @@
             // 
             // txtSend
             // 
-            this.txtSend.Location = new System.Drawing.Point(6, 246);
+            this.txtSend.Location = new System.Drawing.Point(8, 421);
             this.txtSend.Name = "txtSend";
-            this.txtSend.Size = new System.Drawing.Size(341, 28);
+            this.txtSend.Size = new System.Drawing.Size(330, 28);
             this.txtSend.TabIndex = 10;
             this.txtSend.Text = "";
+            this.txtSend.TextChanged += new System.EventHandler(this.txtSend_TextChanged);
             // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(6, 231);
+            this.label7.Location = new System.Drawing.Point(6, 406);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(89, 12);
             this.label7.TabIndex = 9;
@@ -131,7 +155,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(306, 207);
+            this.label6.Location = new System.Drawing.Point(295, 382);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(35, 12);
             this.label6.TabIndex = 8;
@@ -139,7 +163,7 @@
             // 
             // txtSecond
             // 
-            this.txtSecond.Location = new System.Drawing.Point(224, 202);
+            this.txtSecond.Location = new System.Drawing.Point(213, 377);
             this.txtSecond.Name = "txtSecond";
             this.txtSecond.Size = new System.Drawing.Size(76, 21);
             this.txtSecond.TabIndex = 7;
@@ -147,7 +171,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(165, 207);
+            this.label5.Location = new System.Drawing.Point(154, 382);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(53, 12);
             this.label5.TabIndex = 6;
@@ -156,7 +180,7 @@
             // cbTimeSend
             // 
             this.cbTimeSend.AutoSize = true;
-            this.cbTimeSend.Location = new System.Drawing.Point(23, 202);
+            this.cbTimeSend.Location = new System.Drawing.Point(23, 377);
             this.cbTimeSend.Name = "cbTimeSend";
             this.cbTimeSend.Size = new System.Drawing.Size(72, 16);
             this.cbTimeSend.TabIndex = 5;
@@ -165,7 +189,7 @@
             // 
             // btnSend
             // 
-            this.btnSend.Location = new System.Drawing.Point(261, 292);
+            this.btnSend.Location = new System.Drawing.Point(263, 462);
             this.btnSend.Name = "btnSend";
             this.btnSend.Size = new System.Drawing.Size(75, 23);
             this.btnSend.TabIndex = 0;
@@ -177,7 +201,7 @@
             // 
             this.groupBox6.Controls.Add(this.rbRecStr);
             this.groupBox6.Controls.Add(this.rbRec16);
-            this.groupBox6.Location = new System.Drawing.Point(175, 155);
+            this.groupBox6.Location = new System.Drawing.Point(175, 319);
             this.groupBox6.Name = "groupBox6";
             this.groupBox6.Size = new System.Drawing.Size(172, 41);
             this.groupBox6.TabIndex = 2;
@@ -220,7 +244,7 @@
             // 
             this.groupBox5.Controls.Add(this.rbSendStr);
             this.groupBox5.Controls.Add(this.rbSend16);
-            this.groupBox5.Location = new System.Drawing.Point(6, 155);
+            this.groupBox5.Location = new System.Drawing.Point(6, 319);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Size = new System.Drawing.Size(163, 41);
             this.groupBox5.TabIndex = 1;
@@ -248,6 +272,7 @@
             this.rbSend16.TabStop = true;
             this.rbSend16.Text = "16进制";
             this.rbSend16.UseVisualStyleBackColor = true;
+            this.rbSend16.CheckedChanged += new System.EventHandler(this.rbSend16_CheckedChanged);
             // 
             // btnSwitck
             // 
@@ -399,16 +424,16 @@
             this.groupBox2.Controls.Add(this.txtReceive);
             this.groupBox2.Location = new System.Drawing.Point(371, 12);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(417, 376);
+            this.groupBox2.Size = new System.Drawing.Size(561, 534);
             this.groupBox2.TabIndex = 1;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "接收方";
             // 
             // txtReceive
             // 
-            this.txtReceive.Location = new System.Drawing.Point(6, 20);
+            this.txtReceive.Location = new System.Drawing.Point(17, 20);
             this.txtReceive.Name = "txtReceive";
-            this.txtReceive.Size = new System.Drawing.Size(405, 332);
+            this.txtReceive.Size = new System.Drawing.Size(544, 514);
             this.txtReceive.TabIndex = 0;
             this.txtReceive.Text = "";
             // 
@@ -420,9 +445,9 @@
             this.tsDataBits,
             this.tsStopBits,
             this.tsParity});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 428);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 579);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(800, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(944, 22);
             this.statusStrip1.TabIndex = 3;
             // 
             // tsSpNum
@@ -457,7 +482,7 @@
             // 
             // btnClear
             // 
-            this.btnClear.Location = new System.Drawing.Point(653, 395);
+            this.btnClear.Location = new System.Drawing.Point(797, 553);
             this.btnClear.Name = "btnClear";
             this.btnClear.Size = new System.Drawing.Size(59, 23);
             this.btnClear.TabIndex = 4;
@@ -467,7 +492,7 @@
             // 
             // btnExit
             // 
-            this.btnExit.Location = new System.Drawing.Point(728, 395);
+            this.btnExit.Location = new System.Drawing.Point(872, 553);
             this.btnExit.Name = "btnExit";
             this.btnExit.Size = new System.Drawing.Size(54, 23);
             this.btnExit.TabIndex = 5;
@@ -483,14 +508,14 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(944, 601);
             this.Controls.Add(this.btnExit);
             this.Controls.Add(this.btnClear);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Name = "Form1";
-            this.Text = "Lin\'s串口助手";
+            this.Text = "LinQian\'s串口助手";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
@@ -550,6 +575,8 @@
         private System.Windows.Forms.ToolStripStatusLabel tsDataBits;
         private System.Windows.Forms.ToolStripStatusLabel tsStopBits;
         private System.Windows.Forms.ToolStripStatusLabel tsParity;
+        private System.Windows.Forms.CheckBox cbSendHex;
+        private System.Windows.Forms.TextBox txtStrTo16;
     }
 }
 

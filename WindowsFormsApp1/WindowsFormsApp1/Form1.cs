@@ -15,6 +15,120 @@ namespace WindowsFormsApp1
 {
     public partial class Form1 : Form
     {
+        #region 日记记录，在richtextbox中显示不同颜色文字的方法
+        public delegate void LogAppendDelegate(Color color, string text);
+
+        //追加显示文本
+        public void LogAppend(Color color, string msg)
+        {
+            txtReceive.SelectionColor = color;
+            txtReceive.AppendText(msg);
+            txtReceive.AppendText("\n");
+        }
+
+        //显示错误信息
+        public void LogError(string msg)
+        {
+            LogAppendDelegate lab = new LogAppendDelegate(LogAppend);
+            txtReceive.Invoke(lab, Color.Red, DateTime.Now.ToString("HH:mm:ss ") + msg);
+        }
+
+        //显示警告信息
+        public void LogWarning(string msg)
+        {
+            LogAppendDelegate lab = new LogAppendDelegate(LogAppend);
+            txtReceive.Invoke(lab, Color.Violet, DateTime.Now.ToString("HH:mm:ss ") + msg);
+        }
+
+        //显示信息
+        public void LogMessage(string msg)
+        {
+            LogAppendDelegate lab = new LogAppendDelegate(LogAppend);
+            txtReceive.Invoke(lab, Color.Black, DateTime.Now.ToString("HH:mm:ss ") + msg);
+        }
+
+        //发送信息的设置
+        public void SendMessage(string msg)
+        {
+            LogAppendDelegate lab = new LogAppendDelegate(LogAppend);
+            txtReceive.Invoke(lab, Color.Green, DateTime.Now.ToString("HH:mm:ss ") + msg);
+        }
+
+        //接收信息的设置
+        public void RcvMessage(string msg)
+        {
+            LogAppendDelegate lab = new LogAppendDelegate(LogAppend);
+            txtReceive.Invoke(lab, Color.Blue, DateTime.Now.ToString("HH:mm:ss ") + msg);
+        }
+        #endregion
+
+        #region HEX16进制、Byte字节数组和字符串之间的转换
+        //byte字节数组转16进制
+        private string ByteToHex(byte[] comByte)
+        {
+            StringBuilder builder = new StringBuilder(comByte.Length * 3);
+
+            foreach (byte data in comByte)
+            {
+                builder.Append(Convert.ToString(data, 16).PadLeft(2, '0').PadRight(3, ' '));
+            }
+            return builder.ToString().ToUpper();
+        }
+
+        //16进制转字节数组
+        private byte[] HexToByte(string msg)
+        {
+            msg = msg.Replace(" ", "");
+            msg = msg.Replace("0x", "");
+            msg = msg.Replace("0X", "");
+
+            byte[] comBuffer = new byte[msg.Length / 2];
+
+            for(int i=0; i<msg.Length; i+=2)
+            {
+                comBuffer[i / 2] = (byte)Convert.ToByte(msg.Substring(i, 2), 16);
+            }
+
+            return comBuffer;
+        }
+
+        //字符串转字节数组
+        private byte[] StringToByte(string msgtxt)
+        {
+            return System.Text.Encoding.UTF8.GetBytes(msgtxt);
+        }
+
+        //字节型数组转字符串
+        private string ByteToString(byte[] buffer)
+        {
+            return System.Text.Encoding.UTF8.GetString(buffer);
+        }
+        #endregion
+
+        #region SettingControls 设置控件可用状态的方法
+        private void SettingControls(int canUse)
+        {
+            //canUse 参数1：可用 0：不可用
+            if (canUse == 1)
+            {
+                cbSerial.Enabled = true;
+                cbBaudRate.Enabled = true;
+                cbDataBits.Enabled = true;
+                cbStop.Enabled = true;
+                cbParity.Enabled = true;
+            }
+            else if(canUse == 0)
+            {
+                //设置必要控件不可用
+                cbSerial.Enabled = false;
+                cbBaudRate.Enabled = false;
+                cbDataBits.Enabled = false;
+                cbStop.Enabled = false;
+                cbParity.Enabled = false;
+            }
+        }
+        #endregion
+
         SerialPort sp1 = new SerialPort();
 
         public Form1()
@@ -22,13 +136,13 @@ namespace WindowsFormsApp1
             InitializeComponent();
         }
 
-        //加载
-        private void Form1_Load(object sender, EventArgs e)
+        #region Form1_Load 窗口加载
+        private void Form1_Load(object sender, EventArgs e)//加载
         {
             INIFILE.Profile.LoadProfile();//加载所有
 
             //预置波特率
-            switch(Profile.G_BAUDRATE)
+            switch (Profile.G_BAUDRATE)
             {
                 case "300":
                     cbBaudRate.SelectedIndex = 0;
@@ -60,7 +174,8 @@ namespace WindowsFormsApp1
 
                 default:
                     {
-                        MessageBox.Show("波特率预置参数错误");
+                        MessageBox.Show("波特率预置参数错误", "异常提示信息",
+                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         return;
                     }
             }
@@ -83,7 +198,8 @@ namespace WindowsFormsApp1
 
                 default:
                     {
-                        MessageBox.Show("数据位预置参数错误");
+                        MessageBox.Show("数据位预置参数错误", "异常提示信息",
+                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         return;
                     }
             }
@@ -103,7 +219,8 @@ namespace WindowsFormsApp1
 
                 default:
                     {
-                        MessageBox.Show("停止位预置参数错误");
+                        MessageBox.Show("停止位预置参数错误", "异常提示信息",
+                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         return;
                     }
             }
@@ -123,21 +240,23 @@ namespace WindowsFormsApp1
 
                 default:
                     {
-                        MessageBox.Show("校验位预置参数错误");
+                        MessageBox.Show("校验位预置参数错误", "异常提示信息",
+                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         return;
                     }
             }
 
             //检查是否含有串口
             string[] str = SerialPort.GetPortNames();
-            if(str == null)
+            if (str == null)
             {
-                MessageBox.Show("本机没有串口！", "Error");
+                MessageBox.Show("本机没有串口！", "Error",
+                            MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
             //添加串口项目
-            foreach(string s in System.IO.Ports.SerialPort.GetPortNames())
+            foreach (string s in System.IO.Ports.SerialPort.GetPortNames())
             {
                 //获取有多少个COM口
                 cbSerial.Items.Add(s);
@@ -157,80 +276,80 @@ namespace WindowsFormsApp1
             //准备就绪
             sp1.DtrEnable = true;
             sp1.RtsEnable = true;
+
             //设置数据读取超时为1s
             sp1.ReadTimeout = 1000;
 
+            //关闭串口
             sp1.Close();
-
         }
+        #endregion
 
+        #region sp1_DataReceived 处理接收数据
         void sp1_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            if(sp1.IsOpen)//判断是否打开串口
+            if (sp1.IsOpen)//判断是否打开串口
             {
-                //输出当前时间
-                DateTime dt = DateTime.Now;
-                txtReceive.Text += dt.GetDateTimeFormats('f')[0].ToString() + "\r\n";
-                txtReceive.SelectAll();
-                txtReceive.SelectionColor = Color.Blue;     //改变字体的颜色
-
                 byte[] byetRead = new byte[sp1.BytesToRead];//BytesToRead:sp1接收的字符个数
-                if (rbSendStr.Checked)//‘发送字符串’单选按钮
+                sp1.Read(byetRead, 0, byetRead.Length);
+                sp1.DiscardInBuffer();
+
+                if (rbRecStr.Checked)//‘接收字符串’单选按钮
                 {
-                    txtReceive.Text += sp1.ReadLine() + "\r\n"; //注意：回车换行必须这样写，单独使用"\r"和"\n"都不会有效果
-                    sp1.DiscardInBuffer();                      //清空SerialPort控件的Buffer
-                }
-                else//'发送16进制按钮'
+                    string receiveStr = ByteToString(byetRead);
+                    RcvMessage(receiveStr);
+                 }
+                else//'接收16进制按钮'
                 {
                     try
                     {
-                        Byte[] receivedData = new Byte[sp1.BytesToRead];//创建接收字节数组
-                        sp1.Read(receivedData, 0, receivedData.Length); //读取数据
-                        sp1.DiscardInBuffer();                          //清空SerialPort控件的Buffer
+                        string strRev = ByteToHex(byetRead);
+                        RcvMessage(strRev);
 
-                        string strRev = null;
-                        for(int i=0; i< receivedData.Length; i++)       //显示窗体
-                        {
-                            strRev += receivedData[i].ToString("X2");   //16进制显示
-                        }
-                        txtReceive.Text += strRev + "\r\n";
                     }
-                    catch(System.Exception ex)
+                    catch (System.Exception ex)
                     {
-                        MessageBox.Show(ex.Message, "错误提示");
+                        MessageBox.Show(ex.Message, "错误提示",
+                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         txtSend.Text = "";
                     }
                 }
             }
             else
             {
-                MessageBox.Show("请打开某个串口", "错误提示");
+                MessageBox.Show("请打开某个串口", "信息提示",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
+        #endregion
 
-        //清除按钮
+        #region btnClear_Click 清空按钮
         private void btnClear_Click(object sender, EventArgs e)
         {
             txtReceive.Text = "";//清空文本
         }
+        #endregion
 
-        //退出按钮
+        #region btnExit_Click 退出按钮
         private void btnExit_Click(object sender, EventArgs e)
         {
             Application.Exit();
         }
+        #endregion
 
-        //关闭时事件
+        #region Form1_FormClosing 关闭窗口时事件
         private void Form1_FormClosing(object sender, FormClosedEventArgs e)
         {
+            //保存配置到INI文件
             INIFILE.Profile.SaveProfile();
             sp1.Close();
         }
+        #endregion
 
-        //发送按钮
+        #region btnSend_Click 发送按钮:处理数字转换
         private void btnSend_Click(object sender, EventArgs e)
         {
-            if(cbTimeSend.Checked)//选中‘定时发送’
+            if (cbTimeSend.Checked)//选中‘定时发送’
             {
                 tmSend.Enabled = true;
             }
@@ -241,68 +360,43 @@ namespace WindowsFormsApp1
 
             if (!sp1.IsOpen)//如果没有打开串口
             {
-                MessageBox.Show("请先打开串口！", "Error");
+                MessageBox.Show("请先打开串口！", "提示信息",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
             String strSend = txtSend.Text;
-            if(rbSend16.Checked == true)//‘HEX发送’按钮
+            if (rbSend16.Checked == true)//‘HEX发送’按钮
+            {
+                //如果以16进制形式发送，将16进制数转换为byte数组进行发送
+                try
+                {
+                    byte[] byteBuffer = HexToByte(strSend);
+                    sp1.Write(byteBuffer, 0, byteBuffer.Length);
+                    SendMessage(ByteToHex(byteBuffer));
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("16进制数据的格式或长度不正确，请检查格式后重新发送！" + ex.Message, "Error");
+                }
+            }
+            else if (rbSendStr.Checked == true)//‘字符发送’按钮
             {
                 //处理数字转换
-                string sendBuf = strSend;
-                string sendnoNull = sendBuf.Trim();
-                string sendNOComma = sendnoNull.Replace(',', ' ');//去掉英文逗号
-                string sendNOComma1 = sendNOComma.Replace(',', ' ');//去掉中文逗号
-                string strSendNoComma2 = sendNOComma1.Replace("0x", "");//去掉0x
-                strSendNoComma2.Replace("0x", "");//去掉0x
-                string[] strArray = strSendNoComma2.Split(' ');
-
-                int byteBufferLength = strArray.Length;
-                for(int i=0; i< strArray.Length;i++)
-                {
-                    if(strArray[i] == "")
-                    {
-                        byteBufferLength--;
-                    }
-                }
-
-                byte[] byteBuffer = new byte[byteBufferLength];
-                int ii = 0;
-                for (int i = 0; i < strArray.Length; i++)//对获取的字符做相加运算
-                {
-                    Byte[] byteOfStr = Encoding.Default.GetBytes(strArray[i]);
-                    int decNum = 0;
-                    if(strArray[i] == "")
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        decNum = Convert.ToInt32(strArray[i], 16);//strArray[i] == 12时，实际值temp == 18
-                    }
-
-                    try//防止输错，使其只能输入一个字节的字符
-                    {
-                        byteBuffer[ii] = Convert.ToByte(decNum);
-                    }
-                    catch(System.Exception ex)
-                    {
-                        MessageBox.Show("字节越界，请逐个字符输入" + ex.Message, "Error");
-                        tmSend.Enabled = false;
-                        return;
-                    }
-
-                    ii++;
-                }
+                //如果以字符串形式发送，将字符串转换为byte数组进行发送
+                byte[] byteBuffer = StringToByte(strSend);
                 sp1.Write(byteBuffer, 0, byteBuffer.Length);
+                SendMessage(strSend);
             }
-            else//以字符串形式发送时
+            else
             {
-                sp1.WriteLine(txtSend.Text);//写入数据
+                MessageBox.Show("请选择数据发送的格式！", "提示信息",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
+        #endregion
 
-        //开关按钮
+        #region btnSwitck_Click 开关串口按钮
         private void btnSwitck_Click(object sender, EventArgs e)
         {
             //serialPort1.IsOpen
@@ -323,7 +417,7 @@ namespace WindowsFormsApp1
 
                     sp1.BaudRate = iBaudRate;   //波特率
                     sp1.DataBits = iDateBits;   //数据位
-                    switch(cbStop.Text)         //停止位
+                    switch (cbStop.Text)         //停止位
                     {
                         case "1":
                             sp1.StopBits = StopBits.One;
@@ -338,7 +432,7 @@ namespace WindowsFormsApp1
                             MessageBox.Show("Error:参数不正确！", "Error");
                             break;
                     }
-                    switch(cbParity.Text)       //校验位
+                    switch (cbParity.Text)       //校验位
                     {
                         case "无":
                             sp1.Parity = Parity.None;
@@ -354,7 +448,7 @@ namespace WindowsFormsApp1
                             break;
                     }
 
-                    if(sp1.IsOpen == true)//如果打开状态，则先关闭一下
+                    if (sp1.IsOpen == true)//如果打开状态，则先关闭一下
                     {
                         sp1.Close();
                     }
@@ -367,19 +461,20 @@ namespace WindowsFormsApp1
                     tsParity.Text = "校验位：" + sp1.Parity + "|";
 
                     //设置必要控件不可用
-                    cbSerial.Enabled = false;
-                    cbBaudRate.Enabled = false;
-                    cbDataBits.Enabled = false;
-                    cbStop.Enabled = false;
-                    cbParity.Enabled = false;
+                    SettingControls(0);
 
-                    sp1.Open(); //打开串口
+                    //打开串口
+                    sp1.Open();
+                    //将按钮内容设置为"关闭串口"
                     btnSwitck.Text = "关闭串口";
                 }
-                catch(System.Exception ex)
+                catch (System.Exception ex)
                 {
                     MessageBox.Show("Error:" + ex.Message, "Error");
                     tmSend.Enabled = false;
+
+                    //设置必要控件为可用状态
+                    SettingControls(1);
                     return;
                 }
             }
@@ -394,19 +489,19 @@ namespace WindowsFormsApp1
 
                 //恢复控件功能
                 //设置必要控件不可用
-                cbSerial.Enabled = true;
-                cbBaudRate.Enabled = true;
-                cbDataBits.Enabled = true;
-                cbStop.Enabled = true;
-                cbParity.Enabled = true;
+                SettingControls(1);
 
-                sp1.Close();            //关闭串口
+                //关闭串口
+                sp1.Close();
+                //将按钮内容设置为"打开串口"
                 btnSwitck.Text = "打开串口";
-                tmSend.Enabled = false; //关闭计时器
+                //关闭计时器
+                tmSend.Enabled = false;
             }
         }
+        #endregion
 
-        //保存按钮
+        #region btnSave_Click 保存设置按钮
         private void btnSave_Click(object sender, EventArgs e)
         {
             //设置各“串口设置”
@@ -418,7 +513,7 @@ namespace WindowsFormsApp1
 
             Profile.G_BAUDRATE = iBaudRate + "";//波特率
             Profile.G_DATABITS = iDateBits + "";//数据位
-            switch(cbStop.Text) //停止位
+            switch (cbStop.Text) //停止位
             {
                 case "1":
                     Profile.G_STOP = "1";
@@ -430,10 +525,11 @@ namespace WindowsFormsApp1
                     Profile.G_STOP = "2";
                     break;
                 default:
-                    MessageBox.Show("Error:参数不正确！", "Error");
+                    MessageBox.Show("Error:停止位参数不正确！", "Error",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     break;
             }
-            switch(cbParity.Text)//校验位
+            switch (cbParity.Text)//校验位
             {
                 case "无":
                     Profile.G_PARITY = "NONE";
@@ -445,15 +541,21 @@ namespace WindowsFormsApp1
                     Profile.G_PARITY = "EVEN";
                     break;
                 default:
-                    MessageBox.Show("Error:参数不正确！", "Error");
+                    MessageBox.Show("Error:校验位参数不正确！", "Error",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     break;
             }
 
             //保存设置
             Profile.SaveProfile();
-        }
 
-        //定时器
+            //保存成功提示
+            MessageBox.Show("设置保存成功！", "信息提示",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        #endregion
+
+        #region tmSend_Tick 定时器
         private void tmSend_Tick(object sender, EventArgs e)
         {
             //转换时间间隔
@@ -463,28 +565,32 @@ namespace WindowsFormsApp1
                 //Interval以微妙为单位
                 int isecond = int.Parse(strSecond) * 1000;
                 tmSend.Interval = isecond;
-                if(tmSend.Enabled == true)
+                if (tmSend.Enabled == true)
                 {
+                    //如果timeSend空闲是可用状态，用按钮的PerformClick()方法生成按钮的点击事件
                     btnSend.PerformClick();
                 }
             }
-            catch(System.Exception ex)
+            catch (System.Exception ex)
             {
                 tmSend.Enabled = false;
-                MessageBox.Show("错误的定时输入！" + ex.Message, "Error");
+                MessageBox.Show("错误的定时输入！" + ex.Message, "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
+        #endregion
 
+        #region txtSend_KeyPress 发送输入框校验
         private void txtSend_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if(rbSend16.Checked == true)
+            if (rbSend16.Checked == true)
             {
-                //正则匹配
-                string patten = "[0-9a-fA-F]|\b|0x|0X| ";//“\b”:退格键
+                //正则匹配，“\b”:退格键（对16进制的输入进行格式校验）
+                string patten = "[0-9a-fA-F]|\b|0x|0X| ";
                 Regex r = new Regex(patten);
                 Match m = r.Match(e.KeyChar.ToString());
 
-                if(m.Success)
+                if (m.Success)
                 {
                     e.Handled = false;
                 }
@@ -498,7 +604,9 @@ namespace WindowsFormsApp1
                 e.Handled = false;
             }
         }
+        #endregion
 
+        #region txtSecond_KeyPress 定时输入校验
         private void txtSecond_KeyPress(object sender, KeyPressEventArgs e)
         {
             string patten = "[0-9]|\b";//“\b”:退格键
@@ -514,5 +622,51 @@ namespace WindowsFormsApp1
                 e.Handled = true;
             }
         }
+        #endregion
+
+        #region rbSend16_CheckedChanged 发送方式改变时清空原来的输入框
+        //这个功能待完善
+        private void rbSend16_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rbRec16.Checked == true)
+            {
+                cbSendHex.Enabled = false;
+                txtStrTo16.Text = "";
+            }
+            else
+            {
+                cbSendHex.Enabled = true;
+            }
+            txtSend.Text = "";
+        }
+        #endregion
+
+        #region 用于将输入框的字符串实时翻译为16进制
+        //用于监听cbSendHex按钮的状态
+        private void cbSendHex_CheckedChanged(object sender, EventArgs e)
+        {
+            //如果cbSendHex按钮选中就翻译发送框的内容
+            if (cbSendHex.Checked == true)
+            {
+                txtStrTo16.Text = ByteToHex(StringToByte(txtSend.Text));
+            }
+            else
+            {
+                txtStrTo16.Text = "";
+            }
+        }
+
+        //用于监听txtSend的文本输入
+        private void txtSend_TextChanged(object sender, EventArgs e)
+        {
+            //如果txtSend的内容发送改变，txtStrTo16实时将字符串翻转
+            if (cbSendHex.Checked == true && rbRec16.Checked == false)
+            {
+                txtStrTo16.Text = ByteToHex(StringToByte(txtSend.Text));
+            }
+        }
+        #endregion
+
+
     }
 }
